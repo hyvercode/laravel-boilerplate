@@ -2,119 +2,59 @@
 
 namespace App\Services;
 
-use App\Adaptors\SynchronizationAdaptors;
-use App\Repositories\UserRepository;
-use App\Utils\BaseResponse;
-use App\Utils\BusinessException;
-use App\Utils\CommonUtil;
-use App\Utils\Constants;
-use App\Utils\DateTimeConverter;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
+use App\Models\AuthOtp;
+use App\Repositories\AutOtpRepository;
+use App\Helpers\CommonUtil;
+use App\Helpers\DateTimeConverter;
 
 class OtpService
 {
+    protected $otpRepository;
 
-    private $userRepository;
-    private $synchronizationAdaptors;
-
-    public function __construct(UserRepository          $userRepository,
-                                SynchronizationAdaptors $synchronizationAdaptors)
+    public function __construct(AutOtpRepository $autOtpRepository)
     {
-        $this->userRepository = $userRepository;
-        $this->synchronizationAdaptors = $synchronizationAdaptors;
-    }
-
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws BusinessException
-     */
-    public function generate(Request $request)
-    {
-        $user = $this->userRepository->findUserByUsername($request->username);
-        //is not active
-        if (!$user || str_replace(' ', '', $user->status) !== Constants::ACTIVE) {
-            throw new BusinessException(Constants::HTTP_CODE_200, 'OTP has been sent', Constants::HTTP_CODE_200,$request->auth['request_id']);
-        }
-
-        //Store to Redis
-        $otp = CommonUtil::randomNumber();
-        $session = CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $user->id);
-        Redis::del($session);
-
-        Redis::rpush($session, $user->phone_number, $otp);
-        Redis::expire($session, 300); // 5 minutes
-
-        //send mail,otp.notifications
-        $payload = [
-            "email_from" => "pickers@sitama.co.id",
-            "from" => "Pickers",
-            "subject" => "OTP",
-            "email_to" => $user->email,
-            "contents" => $otp . " is your pickers verification code",
-            "otp" => $otp,
-            "phone" => $user->phone_number,
-            "desc" => "pickers"
-        ];
-        $this->synchronizationAdaptors->sendOTP($payload, $request->header(),$request);
-        $this->synchronizationAdaptors->sendMail($payload, $request->header(),$request);
-
-        return BaseResponse::buildResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            [
-                'session_id' => $session,
-                'expired' => DateTimeConverter::exipredTime(env('OTP_EXPIRED', 300 / 5))
-            ]
-        );
+        $this->otpRepository = $autOtpRepository;
     }
 
     /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws BusinessException
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function verified(Request $request)
+    public function create($id)
     {
-        $session = $request->session_id;
-        $otp = $request->otp;
-
-        if (Redis::lrange($session, 0, 0) == NULL) {
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001,$request->auth['request_id']);
-        }
-
-        $session_otp = Redis::lrange($session, 1, 1);
-        if ($session_otp[0] != $otp) {
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9004, Constants::ERROR_CODE_9004,$request->auth['request_id']);
-        }
-
-        Redis::del($session);
-
-        //Store to Redis
-        $otp = CommonUtil::randomNumber();
-        $session = CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $session . ',' . DateTimeConverter::dateTimeFormatNow('YmdHis'));
-        Redis::rpush($session, $session . ',' . DateTimeConverter::dateTimeFormatNow('YmdHis'), $otp);
-        Redis::expire($session, 600); // 10 minutes
-
-        return BaseResponse::buildResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            [
-                'session_id' => $session
-            ],
-            $request->auth['request_id']
-        );
+        $otp = new AuthOtp();
+        $otp->id = $id;
+        $otp->otp = CommonUtil::generateOTP();
+        $otp->expired =env('OTP_EXPIRED','30');
+        $otp->expired_time=DateTimeConverter::exipredTimeIE(env('OTP_EXPIRED','30'));
+        $otp->created_at = DateTimeConverter::getDateTimeNow();
+        return  $this->otpRepository->create($otp->toArray());
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
+     * @param $id
+     * @return mixed
      */
-    public function flush()
+    public function getById($id)
     {
-        Redis::flushDB();
-        return response()->json(['status' => 'Successful']);
+        return $this->otpRepository->findById($id,['id','expired','expired_time']);
+    }
+
+    /**
+     * @param $id
+     * @throws \Exception
+     */
+    public function deleteById($id){
+        $this->otpRepository->deleteById($id);
+    }
+
+    /**
+     * @param $user_id
+     * @param $otp
+     * @return mixed
+     */
+    public function verifikasiOtp($user_id, $otp){
+        return $this->otpRepository->verifikasiOtp($user_id, $otp);
     }
 
 }

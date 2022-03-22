@@ -2,20 +2,23 @@
 
 namespace App\Services;
 
+use App\Helpers\Base64Converter;
+use App\Helpers\CommonUtil;
+use App\Helpers\Constants;
 use App\Models\User;
 use App\Repositories\UserRepository;
-use App\Utils\BaseResponse;
-use App\Utils\BusinessException;
-use App\Utils\CommonUtil;
-use App\Utils\Constants;
-use App\Utils\DateTimeConverter;
-use App\Utils\ImageConverter;
-use App\Utils\Monologger;
+use App\Traits\BaseResponse;
+use App\Traits\BusinessException;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Monolog\Logger;
 
 class UserService implements BaseService
 {
+
     private $userRepository;
 
     public function __construct(UserRepository $userRepository)
@@ -24,33 +27,28 @@ class UserService implements BaseService
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
-     * @throws BusinessException
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
      */
-    public function findById(Request $request)
+    public function all(Request $request)
     {
-        $user = $this->userRepository->getById($request->id, ['users.id', 'users.name', 'users.email', 'users.employee_id', 'users.branch_id']);
-        if (!$user) {
-            throw new BusinessException(Constants::HTTP_CODE_401, Constants::ERROR_MESSAGE_401, Constants::ERROR_CODE_9001, $request->auth['request_id']);
-        }
-
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $user,
-            $request->auth['request_id']
+            $this->userRepository->all(['*'], 'active', true, 'company_id', auth()->user()->company_id)
         );
     }
 
     /**
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse|mixed
      */
-    public function all()
+    public function paginate(Request $request)
     {
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->userRepository->all(['users.id', 'users.username', 'users.name', 'users.phone_number', 'users.email', 'users.api_roles', 'users.menu_roles', 'users.company_id', 'users.branch_id', 'users.employee_id', 'users.status', 'users.coordinate'], 'status', Constants::ACTIVE)
+            $this->userRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'active', true, 'company_id', auth()->user()->company_id)
         );
     }
 
@@ -62,52 +60,47 @@ class UserService implements BaseService
     public function create(Request $request)
     {
         try {
-            $user = new User();
-            $user->id = $request->employee_id;
-            $user->name = $request->name;
-            $user->username = $request->username;
-            $user->password = Hash::make($request->password);
-            $user->phone_number = CommonUtil::phoneNumber($request->phone_number);
-            $user->email = $request->email;
-            $user->api_roles = $request->api_roles;
-            $user->enu_roles = $request->enu_roles;
-            $user->branch_id = $request->branch_id;
-            $user->company_id = $request->company_id;
-            $user->employee_id = $request->employee_id;
-            $user->coordinate = $request->coordinate;
-            $user->status = strtoupper($request->status);
-            $user->avatar = ImageConverter::base64ToImage('images/avatar', $request->avatar);
-            $user->created_at = DateTimeConverter::getDateTimeNow();
-            $user->created_by = $request->get('auth')['user_id'];
-            $this->userRepository->create($user->toArray());
+            $user = User::create([
+                'company_id' => auth()->user()->company_id,
+                'employee_id' => $request->employee_id,
+                'username' => $request->username,
+                'password' => bcrypt($request->password),
+                'email' => $request->email,
+                'menu_roles' => $request->menu_roles,
+                'created_by' => auth()->user()->id,
+                'avatar' => Base64Converter::base64ToImage('avatars', $request->avatar),
+                'active' => Constants::ACTIVE
+            ]);
+
+            event(new Registered($user));
         } catch (\Exception $ex) {
-            Monologger::log(Constants::ERROR, $ex->getMessage(), $request->get('auth')['request_id']);
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000, $request->auth['request_id']);
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
         return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $request->auth['request_id']
         );
     }
 
     /**
      * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse|mixed
      * @throws BusinessException
      */
-    public function deleteById($id)
+    public function deleteById($id, Request $request)
     {
         $record = $this->userRepository->getById($id);
         if (empty($record)) {
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
+
         try {
             $record->delete();
         } catch (\Exception $ex) {
-            Monologger::log(Constants::ERROR, $ex->getMessage());
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
+            throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
         return BaseResponse::statusResponse(
@@ -118,12 +111,61 @@ class UserService implements BaseService
 
     /**
      * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse|mixed
      * @throws BusinessException
      */
-    public function getById($id)
+    public function getById($id, Request $request)
     {
-        $record = $this->userRepository->getById($id, ['users.id', 'users.username', 'users.name', 'users.phone_number', 'users.email', 'users.api_roles', 'users.menu_roles', 'users.company_id', 'users.branch_id', 'users.employee_id', 'users.status', 'users.coordinate']);
+        $record = $this->userRepository->getById($id);
+        if (empty($record)) {
+            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
+        }
+
+        return BaseResponse::buildResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200,
+            $record
+        );
+    }
+
+    /**
+     * @param $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @throws BusinessException
+     */
+    public function updateById($id, Request $request)
+    {
+        $user = $this->userRepository->getById($id);
+        try {
+            $user->username = $request->username;
+            $user->email = $request->email;
+            $user->menu_roles = $request->menu_roles;
+            $user->avatar = Base64Converter::isBase64('avatars', $request->avatar);
+            $user->active = $request->active;
+            $user->updated_by = auth()->user()->id;
+            $this->userRepository->updateById($id, $user->toArray());
+        } catch (\Exception $ex) {
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
+        }
+
+        return BaseResponse::statusResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200,
+        );
+    }
+
+    /**
+     * @param $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @throws BusinessException
+     */
+    public function getProfile(Request $request)
+    {
+        $record = $this->userRepository->getById(auth()->user()->id);
         if (empty($record)) {
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
@@ -137,15 +179,52 @@ class UserService implements BaseService
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|mixed
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
      */
-    public function paginate(Request $request)
+    public function changePassword(Request $request): \Illuminate\Http\JsonResponse
     {
-        return BaseResponse::buildResponse(
+
+        if (!Hash::check($request->old_password, auth()->user()->password)) {
+            throw new BusinessException(Constants::HTTP_CODE_409, 'Your old password does not match', Constants::ERROR_CODE_9000);
+        }
+
+        if (strcmp($request->old_password, $request->new_password) == 0) {
+            //Current password and new password are same
+            throw new BusinessException(Constants::HTTP_CODE_409, "New Password cannot be same as your current password. Please choose a different password.", Constants::ERROR_CODE_9000);
+        }
+
+        $validate = Validator::make($request->all(), [
+            'new_password' => 'required|min:6',
+            'old_password' => 'required|min:6',
+            'password_confirmation' => 'required|same:new_password',
+        ]);
+
+        // Validate password strength
+        $uppercase = preg_match('@[A-Z]@', $request->new_password);
+        $lowercase = preg_match('@[a-z]@', $request->new_password);
+        $number = preg_match('@[0-9]@', $request->new_password);
+        $specialChars = preg_match('@[^\w]@', $request->new_password);
+        if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($request->new_password) < 6) {
+            throw new BusinessException(Constants::HTTP_CODE_409, 'Password should be at least 6 characters in length and should include at least one upper case letter, one number, and one special character.', Constants::ERROR_CODE_9000);
+        }
+
+        if ($validate->fails()) {
+            throw new BusinessException(Constants::HTTP_CODE_422, $validate->errors(), Constants::ERROR_CODE_9000);
+        }
+
+        try {
+            auth()->user()->update([
+                'password' => bcrypt($request->new_password)
+            ]);
+        } catch (\Exception $ex) {
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
+        }
+
+        return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            $this->userRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['users.id', 'users.username', 'users.name', 'users.phone_number', 'users.email', 'users.api_roles', 'users.menu_roles', 'users.company_id', 'users.branch_id', 'users.employee_id', 'users.status', 'users.coordinate'], 'page', $request->page, 'status', Constants::ACTIVE),
-            $request->auth['request_id']
+            Constants::HTTP_MESSAGE_200
         );
     }
 
@@ -155,62 +234,22 @@ class UserService implements BaseService
      * @return \Illuminate\Http\JsonResponse|mixed
      * @throws BusinessException
      */
-    public function updateById($id, Request $request)
+    public function updateAvatar($id, Request $request)
     {
         $user = $this->userRepository->getById($id);
-        if (empty($user)) {
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001, $request->auth['request_id']);
-        }
         try {
-            $user->phone_number = CommonUtil::phoneNumber($request->phone_number);
-            $user->email = $request->email;
-            $user->api_roles = $request->api_roles;
-            $user->enu_roles = $request->enu_roles;
-            $user->branch_id = $request->branch_id;
-            $user->coordinate = $request->coordinate;
-            $user->status = strtoupper($request->status);
-            $user->avatar = ImageConverter::base64ToImage('images/avatar', $request->avatar);
-            $user->updated_at = DateTimeConverter::getDateTimeNow();
-            $user->updated_by = $request->get('auth')['user_id'];
+            $user->avatar = Base64Converter::isBase64('avatars', $request->avatar);
+            $user->updated_by = auth()->user()->id;
             $this->userRepository->updateById($id, $user->toArray());
         } catch (\Exception $ex) {
-            Monologger::log(Constants::ERROR, $ex->getMessage(), $request->get('auth')['request_id']);
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001, $request->auth['request_id']);
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
         return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $request->auth['request_id']
         );
     }
 
-    /**
-     * @param $id
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|mixed
-     * @throws BusinessException
-     */
-    public function updateAvatar(Request $request)
-    {
-        $user = $this->userRepository->getById($request->get('auth')['user_id']);
-        if (empty($user)) {
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001, $request->auth['request_id']);
-        }
-        try {
-            $user->avatar = ImageConverter::base64ToImage('images/avatar', $request->avatar);
-            $user->updated_at = DateTimeConverter::getDateTimeNow();
-            $user->updated_by = $request->get('auth')['user_id'];
-            $this->userRepository->updateById($request->get('auth')['user_id'], $user->toArray());
-        } catch (\Exception $ex) {
-            Monologger::log(Constants::ERROR, $ex->getMessage(), $request->get('auth')['request_id']);
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001, $request->auth['request_id']);
-        }
-
-        return BaseResponse::statusResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            $request->auth['request_id']
-        );
-    }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class RoleRepository extends CrudRepository
 {
 
     public function model()
     {
-       return Role::class;
+        return Role::class;
     }
 }

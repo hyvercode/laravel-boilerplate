@@ -9,25 +9,7 @@ interface BaseService
     /**
      * @return mixed
      */
-    public function all();
-
-    /**
-     * @param Request $request
-     * @return mixed
-     */
-    public function create(Request $request);
-
-    /**
-     * @param $id
-     * @return mixed
-     */
-    public function deleteById($id);
-
-    /**
-     * @param $id
-     * @return mixed
-     */
-    public function getById($id);
+    public function all(Request $request);
 
     /**
      * @param null $searchBy
@@ -39,6 +21,24 @@ interface BaseService
      * @return mixed
      */
     public function paginate(Request $request);
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function create(Request $request);
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function deleteById($id, Request $request);
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function getById($id, Request $request);
 
     /**
      * @param $id

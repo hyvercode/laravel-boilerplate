@@ -2,123 +2,36 @@
 
 namespace App\Services;
 
-use App\Adaptors\SynchronizationAdaptors;
+use App\adaptors\SitamaGateway;
+use App\Helpers\CommonUtil;
+use App\Helpers\Constants;
 use App\Models\User;
 use App\Repositories\UserRepository;
-use App\Utils\BaseResponse;
-use App\Utils\BusinessException;
-use App\Utils\CommonUtil;
-use App\Utils\Constants;
-use App\Utils\Monologger;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\Traits\BaseResponse;
+use App\Traits\BusinessException;
+use App\Helpers\DateTimeConverter;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\JWTAuth;
 
 class AuthService
 {
 
-    private $userRepository;
-    private $synchronizationAdaptors;
+    use BaseResponse;
 
-    public function __construct(UserRepository          $userRepository,
-                                SynchronizationAdaptors $synchronizationAdaptors)
+    protected $jwt;
+    protected $authOtpService;
+
+    public function __construct(JWTAuth        $jwt, OtpService $authOtpService,
+                                UserRepository $userRepository, SitamaGateway $sitamaGateway)
     {
+        $this->jwt = $jwt;
+        $this->authOtpService = $authOtpService;
         $this->userRepository = $userRepository;
-        $this->synchronizationAdaptors = $synchronizationAdaptors;
-    }
-
-    /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws BusinessException
-     */
-    public function register(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'name' => 'required',
-            'username' => 'required|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'phone_number' => 'required|min:6|unique:users',
-        ]);
-        if ($validate->fails()) {
-            throw new BusinessException(Constants::HTTP_CODE_422, $validate->errors(), Constants::ERROR_CODE_9000,$request->auth['request_id']);
-        }
-
-        // Validate password strength
-        $uppercase = preg_match('@[A-Z]@', $request->password);
-        $lowercase = preg_match('@[a-z]@', $request->password);
-        $number = preg_match('@[0-9]@', $request->password);
-        $specialChars = preg_match('@[^\w]@', $request->password);
-        if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($request->password) < 6) {
-            throw new BusinessException(Constants::HTTP_CODE_409, 'Password should be at least 6 characters in length and should include at least one upper case letter, one number, and one special character.', Constants::ERROR_CODE_9000);
-        }
-
-        //Create new user
-        try {
-            $user = new User;
-            $user->name = $request->name;
-            $user->username = $request->username;
-            $user->email = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->status = Constants::ACTIVE;
-            $user->company_id = $request->company_id;
-            $user->branch_id = $request->branch_id;
-            $user->coordinate = $request->coordinate;
-            $user->phone_number = CommonUtil::phoneNumber($request->phone_number);
-            $this->userRepository->create($user->toArray());
-        } catch (\Exception $ex) {
-            Monologger::log(Constants::ERROR, $ex->getMessage(), $request->get('auth')['request_id']);
-            throw new BusinessException(Constants::HTTP_CODE_409, $ex->getMessage(), Constants::ERROR_CODE_9000,$request->auth['request_id']);
-        }
-
-        return BaseResponse::statusResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            $request->auth['request_id']
-        );
-    }
-
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        auth()->logout(true);
-
-        return BaseResponse::statusResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-        );
-    }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return BaseResponse::buildResponse(
-            Constants::HTTP_CODE_200,
-            Constants::HTTP_MESSAGE_200,
-            $this->respondWithToken(auth()->refresh())
-        );
-    }
-
-    /**
-     * @param $token
-     * @param $username
-     * @return array
-     * @throws BusinessException
-     */
-    function respondWithToken($token): array
-    {
-        return [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL($token)
-        ];
+        $this->sitamaGateway = $sitamaGateway;
     }
 
     /**
@@ -128,44 +41,207 @@ class AuthService
      */
     public function login(Request $request)
     {
-        $credentials = new User();
-        $credentials->username = $request->username;
-        $credentials->password = $request->password;
-        $credentials->api_roles = Constants::ADMIN;
-        $credentials->status = Constants::ACTIVE;
+        $credential = [
+            'email' => $request->email,
+            'password' => $request->password,
+            'active' => true,
+        ];
 
         $ttl = env('JWT_TTL', 1440);
         if ($request->remember_me) {
             $ttl = env('JWT_REMEMBER_TTL', 1051200);
         }
 
-        if (!$token = auth()->setTTL($ttl)->attempt($credentials->toArray())) {
-            throw new BusinessException(Constants::HTTP_CODE_409, 'Invalid username or password', Constants::ERROR_CODE_9001,$request->auth['request_id']);
+        if (!$token = auth()->setTTL($ttl)->attempt($credential)) {
+            throw new BusinessException(Constants::HTTP_CODE_409, 'Invalid username or password!', Constants::ERROR_CODE_9000);
         }
 
-        //store fcm
-//        $this->storeFcm($request);
+        return self::buildResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200,
+            $this->generateToken($token),
+            CommonUtil::generateUUID()
+        );
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+        auth()->logout();
+        auth()->invalidate(true);
+        return BaseResponse::statusResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refreshToken(Request $request)
+    {
+        return BaseResponse::buildResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200,
+            $this->generateToken(auth()->refresh())
+        );
+    }
+
+    /**
+     * @param $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
+     */
+    public function destroy($id, Request $request)
+    {
+
+        $token = auth()->tokenById($id);
+        if (!isset($token)) {
+            throw new BusinessException(Constants::HTTP_CODE_403, 'Invalid Authorization', Constants::HTTP_CODE_403);
+        }
+
+        $this->jwt->setToken($token)->invalidate(true);
+        return BaseResponse::statusResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200
+        );
+    }
+
+    /**
+     * @param $token
+     * @param $username
+     * @return array
+     * @throws BusinessException
+     */
+    protected function generateToken($token): array
+    {
+        return [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
+        ];
+    }
+
+    /**
+     * @param $account
+     * @return \Illuminate\Http\JsonResponse
+     * @throws BusinessException
+     */
+    public function generateOTP($account)
+    {
+        try {
+            $user = $this->userRepository->findByAccount($account);
+            if (empty($user)) {
+                throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_CODE_9000, Constants::ERROR_CODE_9000);
+            }
+            $otp = $this->authOtpService->getById($user->id);
+            /*
+             * crate otp
+             */
+            if (!empty($otp)) {
+                $this->authOtpService->deleteById($user->id);
+            }
+            /*
+             * update otp
+             */
+            $otp = $this->authOtpService->create($user->id);
+
+            /*
+             * SMS OTP
+             */
+            $this->sitamaGateway->sendOtp($otp->otp, $user->mobilephoneno);
+
+            /*
+             * MAIL OTP
+             */
+            $content = "Hi, welcome user! \n{$otp->otp} is your PMS verification code";
+            $this->sitamaGateway->sendMail($user->email, '', $content);
+            $response = array("id" => CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $user->id), "expired" => intval($otp->expired), "expired_time" => $otp->expired_time);
+        } catch (\Exception $ex) {
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
+        }
+        return BaseResponse::buildResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200,
+            $response
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * @throws BusinessException
+     */
+    public function verifikasiOTP(Request $request)
+    {
+        /*
+     * Check id registered or not
+     */
+        $user_id = $this->userRepository->getById(CommonUtil::encrypt_decrypt(Constants::DECRYPT, $request->account));
+        if (empty($user_id)) {
+            throw new BusinessException(Constants::HTTP_CODE_409, "Account not found!", Constants::ERROR_CODE_9000);
+        }
+
+        /*
+         * Check ida and otp_code
+         */
+        $verify_otp = $this->authOtpService->verifikasiOtp($user_id->id, $request->otp_code);
+        if (empty($verify_otp)) {
+            throw new BusinessException(Constants::HTTP_CODE_409,  " Invalid OTP code!", Constants::ERROR_CODE_9000);
+        }
+
+        /*
+         * check if otp code expired
+         */
+
+        if (strtotime($verify_otp->expired_time) < strtotime(DateTimeConverter::getDateTimeNow())) {
+            throw new BusinessException(Constants::HTTP_CODE_409, "OTP code has been expired!", Constants::ERROR_CODE_9000);
+        }
+
+        $response = array("id" => CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $user_id->id));
 
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->respondWithToken($token),
-            $request->auth['request_id']
+            $response
         );
     }
+
     /**
-     * @param $id
      * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      * @throws BusinessException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author mohirwanh <mohirwanh@gmail.com>
      */
-    public function storeFcm(Request $request)
+    public function changePassword(Request $request)
     {
-        $user = $this->userRepository->findUserByUsername($request->username);
-        //is not active
-        if (str_replace(' ', '', $user->status) !== Constants::ACTIVE) {
-            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9003, Constants::ERROR_CODE_9003,$request->auth['request_id']);
+        $account = $this->userRepository->getById(CommonUtil::encrypt_decrypt(Constants::DECRYPT, $request->account));
+
+        $uppercase = preg_match('@[A-Z]@', $request->new_password);
+        $lowercase = preg_match('@[a-z]@', $request->new_password);
+        $number = preg_match('@[0-9]@', $request->new_password);
+        $specialChars = preg_match('@[^\w]@', $request->new_password);
+        if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($request->new_password) < 6) {
+            throw new BusinessException(Constants::HTTP_CODE_409, 'Password should be at least 6 characters in length and should include at least one upper case letter, one number, and one special character.', Constants::ERROR_CODE_9000);
         }
-        $this->synchronizationAdaptors->fcmStore(['user_id' => $user->id, 'token' => $request->fcm_token, 'app_name' => Constants::APP_NAME,'scope'=>$user->api_roles], $request->header(), $request);
+
+        try {
+            $account->update([
+                'password' => bcrypt($request->new_password)
+            ]);
+        } catch (\Exception $ex) {
+            Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
+            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
+        }
+
+        return BaseResponse::statusResponse(
+            Constants::HTTP_CODE_200,
+            Constants::HTTP_MESSAGE_200
+        );
     }
 }

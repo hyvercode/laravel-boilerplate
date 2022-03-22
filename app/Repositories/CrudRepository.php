@@ -106,11 +106,11 @@ abstract class CrudRepository
      *
      * @return Collection|static[]
      */
-    public function all(array $columns = ['*'], $isactive = null, $actived = null)
+    public function all(array $columns = ['*'], $active = null, $actived = null, $param = null, $value = null)
     {
         $this->newQuery()->eagerLoad();
 
-        $models = $this->query->where($isactive, $actived)->get($columns);
+        $models = $this->query->where($active, $actived)->where($param, $value)->get($columns);
 
         $this->unsetClauses();
 
@@ -188,6 +188,22 @@ abstract class CrudRepository
         $this->unsetClauses();
 
         return $this->getById($id)->delete();
+    }
+
+
+    /**
+     * Delete the specified model record from the database.
+     *
+     * @param $id
+     *
+     * @return bool|null
+     * @throws \Exception
+     */
+    public function destroyById($id): bool
+    {
+        $this->unsetClauses();
+
+        return $this->getById($id)->destroy($id);
     }
 
     /**
@@ -282,14 +298,14 @@ abstract class CrudRepository
      * @param string|null $actived
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function paginate(string $searchBy = null,$searchParam = null,int $limit = 10, array $columns = ['*'], string $pageName = 'page',int $page = 1,string $active = null,string $actived = null,string $fieled=null,$value=null)
+    public function paginate(string $searchBy = null, $searchParam = null, int $limit = 10, array $columns = ['*'], string $pageName = 'page', int $page = 1, string $active = null, string $actived = null, string $field = null, $value = null, string $sortBy = 'created_at', string $sort = 'DESC')
     {
         $this->newQuery()->eagerLoad()->setClauses()->setScopes();
 
         $models = $this->query->where($searchBy, 'LIKE', "%{$searchParam}%")
             ->where($active, $actived)
-            ->where($fieled, $value)
-            ->orderBy('created_at', 'DESC')
+            ->where($field, $value)
+            ->orderBy($searchBy, $sort)
             ->paginate($limit, $columns, $pageName, $page);
 
         $this->unsetClauses();
@@ -475,5 +491,121 @@ abstract class CrudRepository
         $this->take = null;
 
         return $this;
+    }
+
+    /**
+     * Get the specified model record from the database.
+     *
+     * @param       $id
+     * @param array $columns
+     *
+     * @return bool
+     */
+    public function exists($id, array $columns = ['*']): bool
+    {
+        $this->unsetClauses();
+
+        $this->newQuery()->eagerLoad();
+
+        return $this->query->find($id, $columns)->exists();
+    }
+
+    /**
+     * Get the specified model record from the database.
+     *
+     * @param       $id
+     * @param array $columns
+     *
+     * @return bool
+     */
+    public function existsBy($column, $id): bool
+    {
+        $this->unsetClauses();
+
+        $this->newQuery()->eagerLoad();
+
+        return $this->query->where($column, $id)->exists();
+    }
+
+    /**
+     * Create one or more new model records in the database.
+     *
+     * @param array $data
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function updateMultiple($id, array $data)
+    {
+        $models = new Collection();
+
+        foreach ($data as $d) {
+            $models->push($this->updateById($d[$id], $d));
+        }
+
+        return $models;
+    }
+
+    /**
+     * Create one or more new model records in the database.
+     *
+     * @param array $data
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function updateMultipleActive($id, array $data)
+    {
+        $models = new Collection();
+
+        foreach ($data as $d) {
+            $d->active = true;
+            $models->push($this->updateById($d[$id], $d));
+        }
+
+        return $models;
+    }
+
+    /**
+     * @param $column
+     * @param $value
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Builder[]|Collection
+     */
+    public function getListBy($column, $value, array $columns = ['*'])
+    {
+        $this->unsetClauses();
+
+        $this->newQuery()->eagerLoad();
+
+        return $this->query->where($column, $value)->get($columns);
+    }
+
+    /**
+     * @param $column
+     * @param $value
+     * @param array $columns
+     * @return mixed
+     */
+    public function getBy($column, $value, array $columns = ['*'])
+    {
+        $this->unsetClauses();
+
+        $this->newQuery()->eagerLoad();
+
+        return $this->query->where($column, $value)->get($columns)->first();
+    }
+
+    /**
+     * @param $column
+     * @param $value
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Builder[]|Collection
+     */
+    public function getListById($column_id, $id, $column, $value, array $columns = ['*'])
+    {
+        $this->unsetClauses();
+
+        $this->newQuery()->eagerLoad();
+
+        return $this->query->where($column_id, $id)->where($column, $value)->get($columns);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Helpers\CommonUtil;
 
 class UserRepository extends CrudRepository
 {
@@ -13,34 +14,15 @@ class UserRepository extends CrudRepository
     }
 
     /**
-     * @param $username
-     * @return User
+     * @param $account
+     * @return null
      */
-    public function findUserByUsername($username)
+    public function findByAccount($account)
     {
-        return User::select('id', 'menu_roles as roles', 'branch_id', 'company_id', 'status', 'api_roles', 'username', 'phone_number', 'email')->where('username', '=', $username)->first();
-    }
-
-    /**
-     * @param $username
-     * @return User
-     */
-    public function findUserByPhoneNumber($phone_number)
-    {
-        return User::select('id', 'menu_roles as roles', 'branch_id', 'company_id', 'status', 'api_roles', 'phone_number', 'email')
-            ->where('phone_number', '=', $phone_number)->first();
-    }
-
-    public function findUserById($user_id)
-    {
-        return User::where('id', $user_id)
-            ->get(['users.id', 'users.name', 'users.email', 'status'])->first();
-    }
-
-    public function findUserByIdAndCompany($user_id, $company_id)
-    {
-        return User::where('id', $user_id)
-            ->where('company_id', $company_id)
-            ->get(['id', 'name','username','email', 'status','phone_number'])->first();
+        if (strpos($account, '@')) {
+            return User::where('email', $account)->get(['id', 'email'])->first();
+        } else {
+            return User::where('phone_number', $account)->get(['id', 'email'])->first();
+        }
     }
 }

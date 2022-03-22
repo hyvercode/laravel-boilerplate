@@ -38,7 +38,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL') . '/storage',
+            'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
 
@@ -50,6 +50,7 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
         'sftp' => [
             'driver' => 'sftp',
@@ -63,14 +64,6 @@ return [
             'permPublic' => 0775,
             'directoryPerm' => 0775
         ],
-        'oss' => [
-            'driver' => 'oss',
-            'access_id' => env('CDN_IMG_ID', 'LTAI4GEGv6y9AkvobrREGTdy'),
-            'access_key' => env('CDN_IMG_KEY', 'QAqHV9gXAHaG2vtYR3pEQyWsERczHf'),
-            'bucket' => env('CDN_IMG_PATH_URL', 'basedev'),
-            'endpoint' => env('CDN_IMG_URL', 'oss-ap-southeast-5.aliyuncs.com'),
-            'isCName' => false,
-        ]
 
     ],
 
@@ -85,8 +78,8 @@ return [
     |
     */
 
-//    'links' => [
-//        public_path('storage') => storage_path('app/public'),
-//    ],
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
 
 ];

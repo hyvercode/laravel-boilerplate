@@ -2,9 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Utils\BusinessException;
-use App\Utils\CommonUtil;
-use App\Utils\Constants;
+use App\Helpers\Constants;
+use App\Traits\BusinessException;
 use Closure;
 use Illuminate\Http\Request;
 use Exception;
@@ -23,34 +22,23 @@ class JwtMiddleware
     public function handle(Request $request, Closure $next)
     {
         try {
-            $credentials = JWTAuth::parseToken()->authenticate();
-            if ($credentials->status != Constants::ACTIVE) {
-                throw new BusinessException(Constants::HTTP_CODE_403, 'Invalid Authorization', Constants::HTTP_CODE_403);
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user->active) {
+                throw new BusinessException(Constants::HTTP_CODE_409, 'Your Account not active', Constants::HTTP_CODE_409);
+            }
+
+            if ($user->email_verified_at) {
+                throw new BusinessException(Constants::HTTP_CODE_409, 'Your Account not active', Constants::HTTP_CODE_409);
             }
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                throw new BusinessException(Constants::HTTP_CODE_401, 'Token is Invalid', Constants::HTTP_CODE_401);
+                throw new BusinessException(Constants::HTTP_CODE_403, 'Token is Invalid', Constants::HTTP_CODE_403);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                throw new BusinessException(Constants::HTTP_CODE_403, 'Token is Expired', Constants::HTTP_CODE_403);
+                throw new BusinessException(Constants::HTTP_CODE_403, 'Token is Expired', Constants::HTTP_CODE_401);
             } else {
-                throw new BusinessException(Constants::HTTP_CODE_401, 'Authorization Token not found', Constants::HTTP_CODE_401);
+                throw new BusinessException(Constants::HTTP_CODE_403, 'Authorization Token not found ', Constants::HTTP_CODE_403);
             }
         }
-
-        $request->request->add(
-            ['auth' =>
-                [
-                    'request_id' => CommonUtil::generateUUID(),
-                    'user_id' => $credentials->id,
-                    'company_id' => $credentials->company_id,
-                    'branch_id' => $credentials->branch_id,
-                    'employee_id' => $credentials->employee_id,
-                    'scope' => $credentials->scope,
-                    'roles' => $credentials->roles,
-                    'api_roles' => $credentials->api_roles
-                ]
-            ]);
-
         return $next($request);
     }
 }

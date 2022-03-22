@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\RoleService;
 use Illuminate\Http\Request;
 
-class RoleController
+class RoleController extends Controller
 {
     private $roleService;
 
@@ -15,17 +15,15 @@ class RoleController
     }
 
     /**
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \App\Utils\BusinessException
+     * @return \Illuminate\Http\JsonResponse|mixed
      */
-    public function index()
+    public function all(Request $request)
     {
-        return $this->roleService->all();
+        return $this->roleService->all($request);
     }
 
     /**
-     * @param Request $request
-     * @return bool
+     * @return \Illuminate\Http\JsonResponse|mixed
      */
     public function paginate(Request $request)
     {
