@@ -17,8 +17,8 @@ class CreateMenulistTable extends Migration
             $table->uuid('id')->primary()->unique();
             $table->string('name');
             $table->boolean('active')->default(true);
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

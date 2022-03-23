@@ -19,12 +19,12 @@ class CreateMenusTable extends Migration
             $table->string('href')->nullable();
             $table->string('icon')->nullable();
             $table->string('slug');
-            $table->string('parent_id')->nullable();
-            $table->string('menu_id');
+            $table->uuid('parent_id')->nullable();
+            $table->uuid('menu_id');
             $table->string('sequence');
             $table->boolean('active')->default(true);
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

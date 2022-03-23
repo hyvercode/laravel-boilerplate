@@ -24,8 +24,8 @@ class CreateUsersTable extends Migration
             $table->string('fcm_token')->nullable()->unique();
             $table->string('avatar')->nullable();
             $table->boolean('active')->nullable();
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

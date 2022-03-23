@@ -16,10 +16,10 @@ class CreateMenuroleTable extends Migration
         Schema::create('menu_roles', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
             $table->string('role_name');
-            $table->string('menus_id');
+            $table->uuid('menus_id');
             $table->boolean('active')->default(true);
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -18,8 +18,8 @@ class CreateBanksTable extends Migration
             $table->string('bank_code')->unique();
             $table->string('bank_name',40);
             $table->boolean('active')->default(true);
-            $table->string('created_by');
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -15,14 +15,14 @@ class CreateInboxsTable extends Migration
     {
         Schema::create('inboxs', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
-            $table->string('title', 60);
-            $table->string('content');
+            $table->uuid('user_id');
+            $table->string('subject', 100);
+            $table->text('body');
             $table->string('type', 10);
             $table->boolean('read')->default(false);
             $table->string('icon')->nullable();
-            $table->string('created_by');
-            $table->string('updated_by')->nullable();
+            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
