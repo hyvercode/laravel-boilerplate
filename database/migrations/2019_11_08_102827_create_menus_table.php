@@ -19,8 +19,8 @@ class CreateMenusTable extends Migration
             $table->string('href')->nullable();
             $table->string('icon')->nullable();
             $table->string('slug');
-            $table->string('parent_id')->unsigned()->nullable();
-            $table->string('menu_id')->unsigned();
+            $table->string('parent_id')->nullable();
+            $table->string('menu_id');
             $table->string('sequence');
             $table->boolean('active')->default(true);
             $table->string('created_by')->nullable();

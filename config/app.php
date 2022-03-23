@@ -178,19 +178,21 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        Spatie\Permission\PermissionServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
 
         /*
-      * Image resize
-      */
+         * Image resize
+        */
         Intervention\Image\ImageServiceProvider::class,
 
         /*
-     * excel
-     */
+         * excel
+        */
         Maatwebsite\Excel\ExcelServiceProvider::class,
 
+        /*
+        * jwt-auth
+        */
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
     ],
@@ -247,11 +249,14 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'PDF' => Barryvdh\DomPDF\Facade::class,  /*
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+
+        /*
         * Image Resize
         */
         'Image' => Intervention\Image\Facades\Image::class,
-        /**
+
+        /*
          * excel
          */
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,

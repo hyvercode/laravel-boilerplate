@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\CommonUtil;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
 class MenusTableSeeder extends Seeder
@@ -14,9 +14,6 @@ class MenusTableSeeder extends Seeder
     private $dropdown = false;
     private $sequence = 1;
     private $joinData = array();
-    private $adminRole = null;
-    private $userRole = null;
-    private $company_id=1;
 
     public function join($roles, $menusId)
     {
@@ -34,10 +31,10 @@ class MenusTableSeeder extends Seeder
     {
         DB::beginTransaction();
         foreach ($this->joinData as $data) {
-            DB::table('menu_role')->insert([
+            DB::table('menu_roles')->insert([
+                'id'=>CommonUtil::generateUUID(),
                 'role_name' => $data['role_name'],
-                'menus_id' => $data['menus_id'],
-                'company_id'=>$this->company_id
+                'menus_id' => $data['menus_id']
             ]);
         }
         DB::commit();
@@ -47,46 +44,36 @@ class MenusTableSeeder extends Seeder
     {
         if ($this->dropdown === false) {
             DB::table('menus')->insert([
+                'id'=>CommonUtil::generateUUID(),
                 'slug' => 'link',
                 'name' => $name,
                 'icon' => $icon,
                 'href' => $href,
                 'menu_id' => $this->menuId,
-                'sequence' => $this->sequence,
-                'company_id'=>$this->company_id
+                'sequence' => $this->sequence
             ]);
         } else {
             DB::table('menus')->insert([
+                'id'=>CommonUtil::generateUUID(),
                 'slug' => 'link',
                 'name' => $name,
                 'icon' => $icon,
                 'href' => $href,
                 'menu_id' => $this->menuId,
                 'parent_id' => $this->dropdownId[count($this->dropdownId) - 1],
-                'sequence' => $this->sequence,
-                'company_id'=>$this->company_id
+                'sequence' => $this->sequence
             ]);
         }
         $this->sequence++;
         $lastId = DB::getPdo()->lastInsertId();
         $this->join($roles, $lastId);
-        $permission = Permission::where('name', '=', $name)->get();
-        if (empty($permission)) {
-            $permission = Permission::create(['name' => 'visit ' . $name]);
-        }
-        $roles = explode(',', $roles);
-        if (in_array('user', $roles)) {
-            $this->userRole->givePermissionTo($permission);
-        }
-        if (in_array('admin', $roles)) {
-            $this->adminRole->givePermissionTo($permission);
-        }
         return $lastId;
     }
 
     public function insertTitle($roles, $name)
     {
         DB::table('menus')->insert([
+            'id'=>CommonUtil::generateUUID(),
             'slug' => 'title',
             'name' => $name,
             'menu_id' => $this->menuId,
@@ -106,14 +93,14 @@ class MenusTableSeeder extends Seeder
             $parentId = null;
         }
         DB::table('menus')->insert([
+            'id'=>CommonUtil::generateUUID(),
             'slug' => 'dropdown',
             'name' => $name,
             'icon' => $icon,
             'menu_id' => $this->menuId,
             'sequence' => $this->sequence,
             'parent_id' => $parentId,
-            'href' => $href,
-            'company_id'=>$this->company_id
+            'href' => $href
         ]);
         $lastId = DB::getPdo()->lastInsertId();
         array_push($this->dropdownId, $lastId);
@@ -141,9 +128,9 @@ class MenusTableSeeder extends Seeder
         $this->userRole = Role::where('name', '=', 'user')->first();
         $dropdownId = array();
         /* Create Sidebar menu */
-        DB::table('menulist')->insert([
-            'name' => 'sidebar menu',
-            'company_id'=>$this->company_id
+        DB::table('menu_lists')->insert([
+            'id'=>CommonUtil::generateUUID(),
+            'name' => 'sidebar menu'
         ]);
         $this->menuId = DB::getPdo()->lastInsertId();  //set menuId
         /* guest menu */
@@ -159,9 +146,9 @@ class MenusTableSeeder extends Seeder
         $this->endDropdown();
 
         /* Create top menu */
-        DB::table('menulist')->insert([
-            'name' => 'top_menu',
-            'company_id'=>$this->company_id
+        DB::table('menu_lists')->insert([
+            'id'=>CommonUtil::generateUUID(),
+            'name' => 'top_menu'
         ]);
         $this->menuId = DB::getPdo()->lastInsertId();  //set menuId
         $this->beginDropdown('guest,user,admin', 'Pages');

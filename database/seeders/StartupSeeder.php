@@ -4,15 +4,10 @@ namespace Database\Seeders;
 
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
-use App\Helpers\DateTimeConverter;
-use App\Models\Branch;
-use App\Models\Company;
-use App\Models\Employee;
-use App\Models\RoleHierarchy;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 
 class StartupSeeder extends Seeder
 {
@@ -25,14 +20,15 @@ class StartupSeeder extends Seeder
     {
 
         /* Create roles */
-        $roleAdmin = Role::create(['name' => 'admin']);
-        $user = Role::create(['name' => 'user']);
-        $guest = Role::create(['name' => 'guest']);
+        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'admin']);
+        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'user']);
+        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'guest']);
 
 
         $admin = User::create([
-            "email" => "admin@agreesip.com",
-            "name" => "Aggregator SIP",
+            'id' => CommonUtil::generateUUID(),
+            "email" => "admin@homestead.com",
+            "name" => "homestead.com",
             "phone_number" => "6287885876037",
             'password' => bcrypt('Admin@123!'),
             "menu_roles" => 'user,admin',
