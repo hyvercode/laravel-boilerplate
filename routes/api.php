@@ -117,22 +117,6 @@ Route::group(['prefix' => 'v1'], function () {
             });
         });
 
-        //agreesip-service
-        Route::group(['prefix' => 'debtors'], function () {
-            Route::get('/', [ProspectDebtorController::class, 'all']);
-            Route::get('/paginate', [ProspectDebtorController::class, 'paginate']);
-            Route::post('/create', [ProspectDebtorController::class, 'create']);
-            Route::post('/update/{id}', [ProspectDebtorController::class, 'update']);
-            Route::get('/show/{id}', [ProspectDebtorController::class, 'show']);
-            Route::delete('/delete/{id}', [ProspectDebtorController::class, 'delete']);
-        });
-    });
-
-    Route::group(['prefix' => 'rest', 'middleware' => ['agreesip.auth']], function () {
-        //agreesip-service
-        Route::group(['prefix' => 'agreesip'], function () {
-            Route::post('/debtor/prospect', [ProspectDebtorController::class, 'create']);
-        });
     });
 });
 

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Constants;
 use App\Helpers\DateTimeConverter;
-use App\Models\Menurole;
+use App\Models\MenuRole;
 use App\Repositories\MenuRoleRepository;
 use App\Traits\BaseResponse;
 use App\Traits\BusinessException;
@@ -55,7 +55,7 @@ class MenuRoleService implements BaseService
     public function create(Request $request)
     {
         try {
-            $menu = new Menurole();
+            $menu = new MenuRole();
             $menu->company_id = auth()->user()->company_id;
             $menu->role_name = $request->role_name;
             $menu->menus_id = $request->menus_id;

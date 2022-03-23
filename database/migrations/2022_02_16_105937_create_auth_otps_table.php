@@ -14,7 +14,7 @@ class CreateAuthOtpsTable extends Migration
     public function up()
     {
         Schema::create('auth_otps', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary()->unique();
             $table->integer('otp');
             $table->integer('expired');
             $table->timestamp('expired_time')->nullable();

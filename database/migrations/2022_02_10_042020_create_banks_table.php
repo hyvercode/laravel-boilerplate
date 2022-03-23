@@ -14,7 +14,7 @@ class CreateBanksTable extends Migration
     public function up()
     {
         Schema::create('banks', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary()->unique();
             $table->string('bank_code')->unique();
             $table->string('bank_name',40);
             $table->boolean('active')->default(true);

@@ -13,11 +13,10 @@ class CreateMenuroleTable extends Migration
      */
     public function up()
     {
-        Schema::create('menu_role', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('menu_roles', function (Blueprint $table) {
+            $table->uuid('id')->primary()->unique();
             $table->string('role_name');
-            $table->integer('menus_id')->unsigned();
-            $table->bigInteger('company_id');
+            $table->string('menus_id')->unsigned();
             $table->boolean('active')->default(true);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();

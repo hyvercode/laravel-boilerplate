@@ -15,13 +15,12 @@ class CreateInboxsTable extends Migration
     {
         Schema::create('inboxs', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id');
+            $table->string('user_id');
             $table->string('title', 60);
             $table->string('content');
             $table->string('type', 10);
             $table->boolean('read')->default(false);
-            $table->string('icon')->default('https://file.sitama.co.id/storage/pms/icons/inbox.jpg');
-            $table->bigInteger('company_id');
+            $table->string('icon')->nullable();
             $table->string('created_by');
             $table->string('updated_by')->nullable();
             $table->timestamps();

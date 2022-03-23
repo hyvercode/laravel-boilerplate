@@ -2,14 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Models\Menurole;
+use App\Models\MenuRole;
 
 class MenuRoleRepository extends CrudRepository
 {
 
     public function model()
     {
-        return Menurole::class;
+        return MenuRole::class;
     }
 
     /**

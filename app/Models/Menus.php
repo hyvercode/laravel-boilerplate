@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Menus extends Model
 {
     use SoftDeletes;
-
-    protected $table = 'menus';
-    protected $guarded = [''];
+    protected $guarded = [];
     public $timestamps = false;
 }

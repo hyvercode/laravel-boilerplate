@@ -10,6 +10,5 @@ class AuthOtp extends Model
     use HasFactory;
 
     protected $guarded=[];
-    protected $table = 'auth_otps';
     public $timestamps = false;
 }

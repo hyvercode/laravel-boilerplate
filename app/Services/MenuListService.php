@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Constants;
 use App\Helpers\DateTimeConverter;
-use App\Models\Menulist;
+use App\Models\MenuList;
 use App\Repositories\MenuListRepository;
 use App\Traits\BaseResponse;
 use App\Traits\BusinessException;
@@ -55,7 +55,7 @@ class MenuListService implements BaseService
     public function create(Request $request)
     {
         try {
-            $menu = new Menulist();
+            $menu = new MenuList();
             $menu->company_id = auth()->user()->company_id;
             $menu->name = $request->name;
             $menu->active = $request->active;

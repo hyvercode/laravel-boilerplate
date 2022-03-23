@@ -13,10 +13,9 @@ class CreateMenulistTable extends Migration
      */
     public function up()
     {
-        Schema::create('menulist', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('menu_lists', function (Blueprint $table) {
+            $table->uuid('id')->primary()->unique();
             $table->string('name');
-            $table->bigInteger('company_id');
             $table->boolean('active')->default(true);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();

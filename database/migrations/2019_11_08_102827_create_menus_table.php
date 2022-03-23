@@ -14,15 +14,14 @@ class CreateMenusTable extends Migration
     public function up()
     {
         Schema::create('menus', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary()->unique();
             $table->string('name');
             $table->string('href')->nullable();
             $table->string('icon')->nullable();
             $table->string('slug');
-            $table->integer('parent_id')->unsigned()->nullable();
-            $table->integer('menu_id')->unsigned();
-            $table->integer('sequence');
-            $table->bigInteger('company_id');
+            $table->string('parent_id')->unsigned()->nullable();
+            $table->string('menu_id')->unsigned();
+            $table->string('sequence');
             $table->boolean('active')->default(true);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
