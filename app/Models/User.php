@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\CommonUtil;
+use App\Traits\UUID;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
+    use UUID;
     use Notifiable;
     use SoftDeletes;
     use HasFactory;

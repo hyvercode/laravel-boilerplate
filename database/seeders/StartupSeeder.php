@@ -20,13 +20,12 @@ class StartupSeeder extends Seeder
     {
 
         /* Create roles */
-        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'admin']);
-        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'user']);
-        Role::create(['id' => CommonUtil::generateUUID(), 'name' => 'guest']);
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'user']);
+        Role::create(['name' => 'guest']);
 
 
         $admin = User::create([
-            'id' => CommonUtil::generateUUID(),
             "email" => "admin@homestead.com",
             "name" => "homestead.com",
             "phone_number" => "6287885876037",
