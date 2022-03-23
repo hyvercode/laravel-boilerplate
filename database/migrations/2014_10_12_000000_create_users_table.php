@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('menu_roles')->nullable();
             $table->string('fcm_token')->nullable()->unique();
+            $table->string('personal_access_token')->nullable()->unique();
             $table->string('avatar')->nullable();
             $table->boolean('active')->nullable();
             $table->uuid('created_by');
