@@ -54,7 +54,7 @@ class Base64Converter
             $resized_image = Image::make($file)->resize(500, 500)->stream('png', 100);
             $path = "pms/$dir/" . basename($safeName);
             Storage::disk('sftp')->put("/pms/$dir/" . basename($safeName), $resized_image);
-            return env('CDN_IMG_URL', "https://file.sitama.co.id") . '/storage/' . $path;
+            return env('CDN_IMG_URL', "https://homestead.com") . '/storage/' . $path;
         } catch (\Exception $ex) {
             return $ex->getMessage();
         }

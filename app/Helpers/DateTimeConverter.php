@@ -68,13 +68,5 @@ class DateTimeConverter
         $diff = date_diff(date_create($date_first), date_create($date_end));
         return $diff->h;
     }
-
-    /**
-     * @param $expire
-     * @return false|string
-     */
-    public static  function exipredTimeIE($expire){
-        return date('Y-m-d H:i:s', strtotime("+$expire min"));
-    }
 }
 

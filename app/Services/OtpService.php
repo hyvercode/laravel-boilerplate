@@ -24,7 +24,7 @@ class OtpService
     {
         $otp = new AuthOtp();
         $otp->id = $id;
-        $otp->otp = CommonUtil::generateOTP();
+        $otp->otp = CommonUtil::intGenerate();
         $otp->expired =env('OTP_EXPIRED','30');
         $otp->expired_time=DateTimeConverter::exipredTimeIE(env('OTP_EXPIRED','30'));
         $otp->created_at = DateTimeConverter::getDateTimeNow();

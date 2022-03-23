@@ -120,7 +120,7 @@ class CommonUtil
     /**
      * @return string
      */
-    public static function otpGenerate()
+    public static function strGenerate()
     {
         return Str::random(6);
     }
@@ -128,7 +128,7 @@ class CommonUtil
     /**
      * @return int
      */
-    public static function generateOTP()
+    public static function intGenerate()
     {
         return mt_rand(100000, 999999);
     }

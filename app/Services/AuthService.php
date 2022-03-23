@@ -2,19 +2,15 @@
 
 namespace App\Services;
 
-use App\adaptors\SitamaGateway;
+use App\Adaptors\MailGateway;
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
-use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Traits\BaseResponse;
 use App\Traits\BusinessException;
 use App\Helpers\DateTimeConverter;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\JWTAuth;
 
 class AuthService
@@ -26,7 +22,7 @@ class AuthService
     protected $authOtpService;
 
     public function __construct(JWTAuth        $jwt, OtpService $authOtpService,
-                                UserRepository $userRepository, SitamaGateway $sitamaGateway)
+                                UserRepository $userRepository, MailGateway $sitamaGateway)
     {
         $this->jwt = $jwt;
         $this->authOtpService = $authOtpService;
