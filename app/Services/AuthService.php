@@ -95,11 +95,10 @@ class AuthService
     public function destroy($id, Request $request)
     {
 
-        $token = auth()->tokenById($id);
-        if (!isset($token)) {
-            throw new BusinessException(Constants::HTTP_CODE_403, 'Invalid Authorization', Constants::HTTP_CODE_403);
+        $token = $this->userRepository->getById($id, ['personal_access_token']);
+        if (empty($token)) {
+            throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
-
         $this->jwt->setToken($token)->invalidate(true);
         return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
@@ -188,7 +187,7 @@ class AuthService
          */
         $verify_otp = $this->authOtpService->verifikasiOtp($user_id->id, $request->otp_code);
         if (empty($verify_otp)) {
-            throw new BusinessException(Constants::HTTP_CODE_409,  " Invalid OTP code!", Constants::ERROR_CODE_9000);
+            throw new BusinessException(Constants::HTTP_CODE_409, " Invalid OTP code!", Constants::ERROR_CODE_9000);
         }
 
         /*
