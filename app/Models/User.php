@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'personal_access_token'
     ];
 
     /**
@@ -60,7 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
             "name" => $this->username,
             "menu_roles" => $this->menu_roles,
             "avatar" => $this->avatar,
-            "login_id"=>CommonUtil::generateUUID()
+            "login_id" => CommonUtil::generateUUID()
         ];
     }
 

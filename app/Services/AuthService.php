@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Adaptors\MailGateway;
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
-use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Traits\BaseResponse;
 use App\Traits\BusinessException;
@@ -97,11 +96,11 @@ class AuthService
     {
 
         $user = $this->userRepository->getById($id, ['personal_access_token']);
+        $user->personal_access_token = null;
+        $this->userRepository->updateById(auth()->user()->id, $user->toArray());
         if (empty($user)) {
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
-        $token = $this->jwt->setToken($user->personal_access_token);
-//        $token->invalidate(true);
         return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
@@ -117,8 +116,6 @@ class AuthService
     protected function generateToken($token): array
     {
         $user = $this->userRepository->getById(auth()->user()->id);
-        if (!$user->personal_access_token == null) $this->jwt->setToken($user->personal_access_token)->invalidate(true);
-//        set new token
         $user->personal_access_token = $token;
         $this->userRepository->updateById(auth()->user()->id, $user->toArray());
 
