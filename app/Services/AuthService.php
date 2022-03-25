@@ -96,11 +96,12 @@ class AuthService
     public function destroy($id, Request $request)
     {
 
-        $token = $this->userRepository->getById($id, ['personal_access_token']);
-        if (empty($token)) {
+        $user = $this->userRepository->getById($id, ['personal_access_token']);
+        if (empty($user)) {
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
-        $this->jwt->setToken($token)->invalidate(true);
+        $token = $this->jwt->setToken($user->personal_access_token);
+//        $token->invalidate(true);
         return BaseResponse::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
@@ -116,7 +117,7 @@ class AuthService
     protected function generateToken($token): array
     {
         $user = $this->userRepository->getById(auth()->user()->id);
-        $this->jwt->setToken($user->personal_access_token)->invalidate(true);
+        if (!$user->personal_access_token == null) $this->jwt->setToken($user->personal_access_token)->invalidate(true);
 //        set new token
         $user->personal_access_token = $token;
         $this->userRepository->updateById(auth()->user()->id, $user->toArray());

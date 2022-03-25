@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProspectDebtorController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,19 @@ Route::group(['prefix' => 'v1'], function () {
         Route::group(['prefix' => 'auth'], function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/refresh', [AuthController::class, 'refresh']);
+        });
+
+        /**
+         * user
+         */
+        Route::group(['prefix' => 'users'], function () {
+            Route::get('/', [UserController::class, 'all']);
+            Route::get('/paginate', [UserController::class, 'paginate']);
+            Route::post('/create', [UserController::class, 'create']);
+            Route::post('/update/{id}', [UserController::class, 'update']);
+            Route::get('/show/{id}', [UserController::class, 'show']);
+            Route::delete('/delete/{id}', [UserController::class, 'delete']);
+            Route::get('/profile', [UserController::class, 'profile']);
         });
 
         /**

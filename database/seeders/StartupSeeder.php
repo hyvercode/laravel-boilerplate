@@ -35,5 +35,16 @@ class StartupSeeder extends Seeder
             'remember_token' => Str::random(10),
             'active' => true,
         ]);
+
+        $user = User::create([
+            "email" => "user@homestead.com",
+            "name" => "user homestead",
+            "phone_number" => "6287885876037",
+            'password' => bcrypt('User@123!'),
+            "menu_roles" => 'user',
+            "created_by" => Constants::SYSTEM,
+            'remember_token' => Str::random(10),
+            'active' => true,
+        ]);
     }
 }

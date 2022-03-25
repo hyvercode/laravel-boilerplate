@@ -14,7 +14,7 @@ class CreateInboxsTable extends Migration
     public function up()
     {
         Schema::create('inboxs', function (Blueprint $table) {
-            $table->id();
+            $table->uuid();
             $table->uuid('user_id');
             $table->string('subject', 100);
             $table->text('body');
