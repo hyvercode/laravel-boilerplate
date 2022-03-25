@@ -24,7 +24,7 @@ class JwtMiddleware
         try {
             $user = JWTAuth::parseToken()->authenticate();
             $token = $request->headers->get('Authorization');
-            if (empty($user->personal_access_token) && $token === 'Bearer ' . $user->personal_access_token) {
+            if (empty($user->personal_access_token) || $token === 'Bearer ' . $user->personal_access_token) {
                 throw new BusinessException(Constants::HTTP_CODE_403, 'Token is Invalid', Constants::HTTP_CODE_403);
             }
             if (!$user->active) {
