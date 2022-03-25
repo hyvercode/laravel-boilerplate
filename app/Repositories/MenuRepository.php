@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Menus;
-use App\Services\MenuRenderFromDatabaseDataService;
+use App\Services\MenuRenderService;
 
 class MenuRepository extends CrudRepository
 {
@@ -30,16 +30,31 @@ class MenuRepository extends CrudRepository
             ->orderBy('menus.sequence', 'asc')->get();
     }
 
+    /**
+     * @param $menuName
+     * @return mixed
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function getGuestMenu($menuName)
     {
         return $this->getMenuFromDB($menuName, 'guest');
     }
 
+    /**
+     * @param $menuName
+     * @return mixed
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function getUserMenu($menuName)
     {
        return $this->getMenuFromDB($menuName, 'user');
     }
 
+    /**
+     * @param $menuName
+     * @return mixed
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function getAdminMenu($menuName)
     {
         return $this->getMenuFromDB($menuName, 'admin');
@@ -62,7 +77,7 @@ class MenuRepository extends CrudRepository
         } else {
             $menu = $this->getGuestMenu($menuName);
         }
-        $rfd = new MenuRenderFromDatabaseDataService();
+        $rfd = new MenuRenderService();
         return $rfd->render($menu);
     }
 
@@ -76,7 +91,7 @@ class MenuRepository extends CrudRepository
             ->where('menus.menu_id', '=', $menuId)
             ->where('menus.active', '=',true)
             ->orderBy('menus.sequence', 'asc')->get();
-        $rfd = new MenuRenderFromDatabaseDataService();
+        $rfd = new MenuRenderService();
         return $rfd->render($menu);
     }
 }

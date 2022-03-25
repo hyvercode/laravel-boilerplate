@@ -14,6 +14,13 @@ class MenuBuilderService{
        $this->dropdownDeep = 0;
     }
 
+    /**
+     * @param $menu
+     * @param $element
+     * @param $offset
+     * @return bool
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function innerAddElementToMenuLastPosition(&$menu, $element, $offset){
         $z = 1;
         $result = false;
@@ -30,10 +37,25 @@ class MenuBuilderService{
         return $result;
     }
 
+    /**
+     * @param $element
+     * @param $offset
+     * @return bool
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addElementToMenuLastPosition($element, $offset = 0){
         return $this->innerAddElementToMenuLastPosition($this->menu, $element, $offset);
     }
 
+    /**
+     * @param $id
+     * @param $name
+     * @param $href
+     * @param $icon
+     * @param $iconType
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addRegularLink($id, $name, $href, $icon, $iconType){
         $hasIcon = $icon === false ? false : true;
         if($hasIcon){
@@ -57,6 +79,15 @@ class MenuBuilderService{
         }
     }
 
+    /**
+     * @param $id
+     * @param $name
+     * @param $href
+     * @param $icon
+     * @param $iconType
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addDropdownLink($id, $name, $href, $icon, $iconType){
         $num = count($this->menu);
         $hasIcon = $icon === false ? false : true;
@@ -81,6 +112,15 @@ class MenuBuilderService{
         }
     }
 
+    /**
+     * @param $id
+     * @param $name
+     * @param $href
+     * @param $icon
+     * @param $iconType
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function addLink($id, $name, $href, $icon = false, $iconType = 'png'){
         if($this->dropdown === true){
             $this->addDropdownLink($id, $name, $href, $icon, $iconType);
@@ -89,6 +129,14 @@ class MenuBuilderService{
         }
     }
 
+    /**
+     * @param $id
+     * @param $name
+     * @param $icon
+     * @param $iconType
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function addTitle($id, $name, $icon = false, $iconType = 'png'){
         $hasIcon = $icon === false ? false : true;
         if($hasIcon){
@@ -110,6 +158,15 @@ class MenuBuilderService{
         }
     }
 
+    /**
+     * @param $id
+     * @param $href
+     * @param $name
+     * @param $icon
+     * @param $iconType
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function beginDropdown($id, $href, $name, $icon = false, $iconType = 'png'){
         $this->dropdown = true;
         $this->dropdownDeep++;
@@ -162,6 +219,10 @@ class MenuBuilderService{
 
     }
 
+    /**
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function endDropdown(){
         $this->dropdownDeep--;
         if($this->dropdownDeep < 0){
@@ -172,6 +233,10 @@ class MenuBuilderService{
         }
     }
 
+    /**
+     * @return array
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function getResult(){
         return $this->menu;
     }

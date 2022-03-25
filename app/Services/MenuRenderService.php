@@ -8,7 +8,7 @@ namespace App\Services;
 
 use App\Services\MenuBuilderService;
 
-class MenuRenderFromDatabaseDataService{
+class MenuRenderService{
 
     private $mb; // MenuBuilderService
     private $data;
@@ -17,16 +17,31 @@ class MenuRenderFromDatabaseDataService{
         $this->mb = new MenuBuilderService();
     }
 
+    /**
+     * @param $data
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addTitle($data){
         $this->mb->addTitle($data['id'], $data['name']);
     }
 
+    /**
+     * @param $data
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addLink($data){
         if($data['parent_id'] === NULL){
             $this->mb->addLink($data['id'], $data['name'], $data['href'], $data['icon']);
         }
     }
 
+    /**
+     * @param $id
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function dropdownLoop($id){
         for($i = 0; $i<count($this->data); $i++){
             if($this->data[$i]['parent_id'] == $id){
@@ -41,12 +56,21 @@ class MenuRenderFromDatabaseDataService{
         }
     }
 
+    /**
+     * @param $data
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function addDropdown($data){
         $this->mb->beginDropdown($data['id'], $data['href'], $data['name'], $data['icon']);
         $this->dropdownLoop($data['id']);
         $this->mb->endDropdown();
     }
 
+    /**
+     * @return void
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     private function mainLoop(){
         for($i = 0; $i<count($this->data); $i++){
             switch($this->data[$i]['slug']){

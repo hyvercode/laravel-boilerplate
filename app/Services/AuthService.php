@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Adaptors\MailGateway;
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Traits\BaseResponse;
 use App\Traits\BusinessException;
@@ -114,6 +115,12 @@ class AuthService
      */
     protected function generateToken($token): array
     {
+        $user = $this->userRepository->getById(auth()->user()->id);
+        $this->jwt->setToken($user->personal_access_token)->invalidate(true);
+//        set new token
+        $user->personal_access_token = $token;
+        $this->userRepository->updateById(auth()->user()->id, $user->toArray());
+
         return [
             'access_token' => $token,
             'token_type' => 'bearer',
@@ -144,11 +151,6 @@ class AuthService
              * update otp
              */
             $otp = $this->authOtpService->create($user->id);
-
-            /*
-             * SMS OTP
-             */
-            $this->sitamaGateway->sendOtp($otp->otp, $user->mobilephoneno);
 
             /*
              * MAIL OTP

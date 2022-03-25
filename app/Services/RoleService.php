@@ -16,6 +16,11 @@ class RoleService implements BaseService
         $this->roleRepository = $roleRepository;
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function all(Request $request)
     {
         return BaseResponse::buildResponse(
@@ -25,6 +30,11 @@ class RoleService implements BaseService
         );
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function paginate(Request $request)
     {
         return BaseResponse::buildResponse(
