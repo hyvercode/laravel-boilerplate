@@ -43,7 +43,7 @@ class MenuListService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->menuListRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'company_id', auth()->user()->company_id)
+            $this->menuListRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page)
         );
     }
 
@@ -56,7 +56,6 @@ class MenuListService implements BaseService
     {
         try {
             $menu = new MenuList();
-            $menu->company_id = auth()->user()->company_id;
             $menu->name = $request->name;
             $menu->active = $request->active;
             $menu->created_at = DateTimeConverter::getDateTimeNow();
