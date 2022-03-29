@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProspectDebtorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
@@ -71,6 +72,16 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/show/{id}', [UserController::class, 'show']);
             Route::delete('/delete/{id}', [UserController::class, 'delete']);
             Route::get('/profile', [UserController::class, 'profile']);
+        });
+
+        //company-service
+        Route::group(['prefix' => 'company'], function () {
+            Route::get('/', [CompanyController::class, 'all']);
+            Route::get('/paginate', [CompanyController::class, 'paginate']);
+            Route::post('/create', [CompanyController::class, 'create']);
+            Route::post('/update/{id}', [CompanyController::class, 'update']);
+            Route::get('/show/{id}', [CompanyController::class, 'show']);
+            Route::delete('/delete/{id}', [CompanyController::class, 'delete']);
         });
 
         /**

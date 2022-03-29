@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
+use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -44,6 +45,16 @@ class StartupSeeder extends Seeder
             "menu_roles" => 'user',
             "created_by" => Constants::SYSTEM,
             'remember_token' => Str::random(10),
+            'active' => true,
+        ]);
+
+        $company = Company::create([
+            "company_code" => "BASE",
+            "company_name" => "PT Homestead",
+            "company_alias" => "Homestead",
+            'phone_number' => "6287885876037",
+            "email" => 'user@homestead.com',
+            "created_by" => Constants::SYSTEM,
             'active' => true,
         ]);
     }
