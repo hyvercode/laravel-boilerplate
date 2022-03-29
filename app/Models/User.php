@@ -57,7 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         return [
             "id" => $this->id,
             "email" => $this->email,
-            "name" => $this->username,
+            "name" => $this->name,
             "menu_roles" => $this->menu_roles,
             "avatar" => $this->avatar,
             "login_id" => CommonUtil::generateUUID()

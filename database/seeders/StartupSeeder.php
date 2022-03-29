@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Helpers\CommonUtil;
 use App\Helpers\Constants;
 use App\Models\Company;
+use App\Models\Inbox;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -28,7 +29,7 @@ class StartupSeeder extends Seeder
 
         $admin = User::create([
             "email" => "admin@homestead.com",
-            "name" => "homestead.com",
+            "name" => "homestead",
             "phone_number" => "6287885876037",
             'password' => bcrypt('Admin@123!'),
             "menu_roles" => 'user,admin',
@@ -56,6 +57,16 @@ class StartupSeeder extends Seeder
             "email" => 'user@homestead.com',
             "created_by" => Constants::SYSTEM,
             'active' => true,
+        ]);
+
+        $inbox = Inbox::create([
+            "user_id" => $admin->id,
+            "subject" => "Greeting",
+            "body" => "Hello Homestead ,<br> Awesome your project <br> thanks",
+            "type" => "INBOX",
+            'read' => false,
+            "icon" => "",
+            "created_by" => $user->id,
         ]);
     }
 }

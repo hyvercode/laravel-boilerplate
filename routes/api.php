@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\InboxController;
 use App\Http\Controllers\ProspectDebtorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
@@ -82,6 +83,17 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/update/{id}', [CompanyController::class, 'update']);
             Route::get('/show/{id}', [CompanyController::class, 'show']);
             Route::delete('/delete/{id}', [CompanyController::class, 'delete']);
+        });
+
+        //inboxs-service
+        Route::group(['prefix' => 'inboxs'], function () {
+            Route::get('/', [InboxController::class, 'all']);
+            Route::get('/paginate', [InboxController::class, 'paginate']);
+            Route::post('/create', [InboxController::class, 'create']);
+            Route::post('/update/{id}', [InboxController::class, 'update']);
+            Route::get('/show/{id}', [InboxController::class, 'show']);
+            Route::delete('/delete/{id}', [InboxController::class, 'delete']);
+            Route::get('/count', [InboxController::class, 'count']);
         });
 
         /**

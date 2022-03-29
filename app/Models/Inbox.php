@@ -11,4 +11,5 @@ class Inbox extends Model
     use UUID;
     use HasFactory;
     protected $guarded=[];
+    protected $table='inboxs';
 }

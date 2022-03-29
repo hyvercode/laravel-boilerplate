@@ -42,7 +42,7 @@ class InboxService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->inboxRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'user_id', auth()->user()->id, 'company_id', auth()->user()->company_id)
+            $this->inboxRepository->pagination($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, auth()->user()->id, $request->sortBy, $request->sort)
         );
     }
 
@@ -55,11 +55,11 @@ class InboxService
     {
         try {
             $inbox = new Inbox();
-            $inbox->title = $request->title;
-            $inbox->content = $request->contents;
+            $inbox->subject = $request->subject;
+            $inbox->body = $request->body;
             $inbox->type = $request->type;
             $inbox->user_id = auth()->user()->id;
-            $inbox->company_id = auth()->user()->company_id;
+            $inbox->icon = $request->icon;
             $inbox->created_at = DateTimeConverter::getDateTimeNow();
             $inbox->created_by = auth()->user()->id;
             $this->inboxRepository->create($inbox->toArray());
@@ -126,7 +126,6 @@ class InboxService
         $inbox = $this->inboxRepository->getById($id);
         try {
             $inbox->read = true;
-            $inbox->company_id = auth()->user()->company_id;
             $inbox->updated_at = DateTimeConverter::getDateTimeNow();
             $inbox->updated_by = auth()->user()->id;
             $read = $this->inboxRepository->updateById($id, $inbox->toArray());
