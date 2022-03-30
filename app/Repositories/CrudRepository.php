@@ -295,15 +295,15 @@ abstract class CrudRepository
      * @param string $pageName
      * @param int $page
      * @param string|null $active
-     * @param string|null $actived
+     * @param string|null $isActive
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function paginate(string $searchBy = null, $searchParam = null, int $limit = 10, array $columns = ['*'], string $pageName = 'page', int $page = 1, string $active = null, string $actived = null, string $field = null, $value = null, string $sortBy = 'created_at', string $sort = 'DESC')
+    public function paginate(string $searchBy = null, $searchParam = null, int $limit = 10, array $columns = ['*'], string $pageName = 'page', int $page = 1, string $active = null, string $isActive = null, string $sortBy = 'created_at', string $sort = 'DESC', string $field = null, $value = null,)
     {
         $this->newQuery()->eagerLoad()->setClauses()->setScopes();
 
         $models = $this->query->where($searchBy, 'LIKE', "%{$searchParam}%")
-            ->where($active, $actived)
+            ->where($active, $isActive)
             ->where($field, $value)
             ->orderBy($searchBy, $sort)
             ->paginate($limit, $columns, $pageName, $page);

@@ -35,7 +35,7 @@ class UserService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->userRepository->all(['*'], 'active', true, 'company_id', auth()->user()->company_id)
+            $this->userRepository->all(['*'], 'active', true)
         );
     }
 
@@ -48,7 +48,7 @@ class UserService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->userRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'active', true, 'company_id', auth()->user()->company_id)
+            $this->userRepository->paginate($request->searchBy, $request->searchParam, $request->perPage, ['*'], 'page', $request->currentPage, 'active', true, $request->sortBy, $request->sort)
         );
     }
 
