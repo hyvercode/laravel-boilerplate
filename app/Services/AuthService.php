@@ -197,7 +197,8 @@ class AuthService
         if (strtotime($verify_otp->expired_time) < strtotime(DateTimeConverter::getDateTimeNow())) {
             throw new BusinessException(Constants::HTTP_CODE_409, "OTP code has been expired!", Constants::ERROR_CODE_9000);
         }
-
+        //clear session
+        $this->authOtpService->deleteById($user_id->id);
         $response = array("id" => CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $user_id->id));
 
         return BaseResponse::buildResponse(
