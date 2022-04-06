@@ -22,12 +22,12 @@ class MenuRepository extends CrudRepository
     {
         return Menus::join('menu_roles', 'menus.id', '=', 'menu_roles.menus_id')
             ->join('menu_lists', 'menu_lists.id', '=', 'menus.menu_id')
-            ->select('menus.*')
             ->where('menu_lists.name', '=', $menuName)
             ->where('menu_roles.role_name', '=', $role)
-            ->where('menus.active', '=',true)
-            ->where('menu_roles.active', '=',true)
-            ->orderBy('menus.sequence', 'asc')->get();
+            ->where('menus.active', '=', true)
+            ->where('menu_roles.active', '=', true)
+            ->orderBy('menus.sequence', 'asc')
+            ->get(['menus.*']);
     }
 
     /**
@@ -47,7 +47,7 @@ class MenuRepository extends CrudRepository
      */
     private function getUserMenu($menuName)
     {
-       return $this->getMenuFromDB($menuName, 'user');
+        return $this->getMenuFromDB($menuName, 'user');
     }
 
     /**
@@ -89,7 +89,7 @@ class MenuRepository extends CrudRepository
     {
         $menu = Menus::select('menus.*')
             ->where('menus.menu_id', '=', $menuId)
-            ->where('menus.active', '=',true)
+            ->where('menus.active', '=', true)
             ->orderBy('menus.sequence', 'asc')->get();
         $rfd = new MenuRenderService();
         return $rfd->render($menu);

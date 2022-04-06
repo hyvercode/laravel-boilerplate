@@ -44,7 +44,7 @@ class MenuService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page)
+            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', "", "", $request->page, $request->sortBy, $request->sort)
         );
     }
 
@@ -176,7 +176,7 @@ class MenuService implements BaseService
         if ($request->has('menu')) {
             $menuName = $request->input('menu');
         } else {
-            $menuName = 'sidebar menu';
+            $menuName = 'sidebar_menu';
         }
 
         return BaseResponse::buildResponse(
