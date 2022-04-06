@@ -20,13 +20,13 @@ class MenuRepository extends CrudRepository
      */
     private function getMenuFromDB($menuName, $role)
     {
-        return Menus::join('menu_role', 'menus.id', '=', 'menu_role.menus_id')
-            ->join('menulist', 'menulist.id', '=', 'menus.menu_id')
+        return Menus::join('menu_roles', 'menus.id', '=', 'menu_roles.menus_id')
+            ->join('menu_lists', 'menu_lists.id', '=', 'menus.menu_id')
             ->select('menus.*')
-            ->where('menulist.name', '=', $menuName)
-            ->where('menu_role.role_name', '=', $role)
+            ->where('menu_lists.name', '=', $menuName)
+            ->where('menu_roles.role_name', '=', $role)
             ->where('menus.active', '=',true)
-            ->where('menu_role.active', '=',true)
+            ->where('menu_roles.active', '=',true)
             ->orderBy('menus.sequence', 'asc')->get();
     }
 

@@ -31,7 +31,7 @@ class MenuService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->menuRepository->all(['*'],'active',true, 'company_id', auth()->user()->company_id)
+            $this->menuRepository->all(['*'], 'active', true)
         );
     }
 
@@ -44,7 +44,7 @@ class MenuService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'company_id', auth()->user()->company_id)
+            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page)
         );
     }
 
@@ -57,14 +57,13 @@ class MenuService implements BaseService
     {
         try {
             $menu = new Menus();
-            $menu->company_id = auth()->user()->company_id;
             $menu->name = $request->name;
             $menu->href = $request->href;
             $menu->slug = $request->slug;
             $menu->icon = Base64Converter::base64ToImage($menu->company_id . '/banner', $request->icon);
             $menu->parent_id = $request->parent_id;
             $menu->menu_id = $request->menu_id;
-            $menu->sequence = $menu->max('sequence')+1;
+            $menu->sequence = $menu->max('sequence') + 1;
             $menu->active = $request->active;
             $menu->created_at = DateTimeConverter::getDateTimeNow();
             $menu->created_by = auth()->user()->id;
@@ -135,13 +134,13 @@ class MenuService implements BaseService
     public function updateById($id, Request $request)
     {
         $menu = $this->menuRepository->getById($id);
-
         try {
             $menu->name = $request->name;
             $menu->href = $request->href;
             $menu->slug = $request->slug;
             $menu->parent_id = $request->parent_id;
-            $menu->icon = Base64Converter::isBase64($menu->company_id . '/banner', $request->icon);
+            $menu->is_icon = $request->is_icon;
+            $menu->icon = Base64Converter::isBase64('/menus', $request->icon);
             $menu->menu_id = $request->menu_id;
             $menu->active = $request->active;
             $menu->updated_at = DateTimeConverter::getDateTimeNow();

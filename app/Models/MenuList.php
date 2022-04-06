@@ -14,4 +14,5 @@ class MenuList extends Model
     use SoftDeletes;
     public $guarded = [];
     public $timestamps = false;
+    protected $table="menu_list";
 }

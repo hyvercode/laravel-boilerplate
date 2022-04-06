@@ -12,4 +12,5 @@ class Menus extends Model
     use SoftDeletes;
     protected $guarded = [];
     public $timestamps = false;
+    protected $table="menus";
 }

@@ -32,7 +32,7 @@ class MenusTableSeeder extends Seeder
         DB::beginTransaction();
         foreach ($this->joinData as $data) {
             DB::table('menu_roles')->insert([
-                'id'=>CommonUtil::generateUUID(),
+                'id' => CommonUtil::generateUUID(),
                 'role_name' => $data['role_name'],
                 'menus_id' => $data['menus_id']
             ]);
@@ -44,7 +44,7 @@ class MenusTableSeeder extends Seeder
     {
         if ($this->dropdown === false) {
             DB::table('menus')->insert([
-                'id'=>CommonUtil::generateUUID(),
+                'id' => CommonUtil::generateUUID(),
                 'slug' => 'link',
                 'name' => $name,
                 'icon' => $icon,
@@ -54,7 +54,7 @@ class MenusTableSeeder extends Seeder
             ]);
         } else {
             DB::table('menus')->insert([
-                'id'=>CommonUtil::generateUUID(),
+                'id' => CommonUtil::generateUUID(),
                 'slug' => 'link',
                 'name' => $name,
                 'icon' => $icon,
@@ -73,7 +73,7 @@ class MenusTableSeeder extends Seeder
     public function insertTitle($roles, $name)
     {
         DB::table('menus')->insert([
-            'id'=>CommonUtil::generateUUID(),
+            'id' => CommonUtil::generateUUID(),
             'slug' => 'title',
             'name' => $name,
             'menu_id' => $this->menuId,
@@ -93,7 +93,7 @@ class MenusTableSeeder extends Seeder
             $parentId = null;
         }
         DB::table('menus')->insert([
-            'id'=>CommonUtil::generateUUID(),
+            'id' => CommonUtil::generateUUID(),
             'slug' => 'dropdown',
             'name' => $name,
             'icon' => $icon,
@@ -126,35 +126,34 @@ class MenusTableSeeder extends Seeder
         /* Get roles */
         $this->adminRole = Role::where('name', '=', 'admin')->first();
         $this->userRole = Role::where('name', '=', 'user')->first();
+        $this->guestRole = Role::where('name', '=', 'guest')->first();
+
         $dropdownId = array();
         /* Create Sidebar menu */
         DB::table('menu_lists')->insert([
-            'id'=>CommonUtil::generateUUID(),
-            'name' => 'sidebar menu'
+            'id' => CommonUtil::generateUUID(),
+            'name' => 'sidebar_menu'
         ]);
         $this->menuId = DB::getPdo()->lastInsertId();  //set menuId
+
         /* guest menu */
-        $this->insertLink('guest,user,admin', 'Dashboard', '/', 'cil-speedometer');
-        $this->beginDropdown('admin', 'Settings', '/settings', 'cil-puzzle');
-            $this->insertLink('admin', 'Users', '/setting/users');
-            $this->insertLink('admin', 'Menu', '/setting/menu');
-            $this->insertLink('admin', 'Roles', '/setting/roles');
+        $this->insertLink('guest,user,admin', 'Dashboard', '/', 'pie_chart');
         $this->endDropdown();
-        $this->beginDropdown('user,admin', 'Master', '/masters', 'cil-puzzle');
-        $this->insertLink('user,admin', 'Branch', '/master/branches');
-        $this->insertLink('user,admin', 'Employee', '/master/employees');
+        $this->beginDropdown('user,admin', 'Master', '/masters', 'ballot');
+            $this->insertLink('admin', 'Users', '/masters/users');
+            $this->insertLink('admin', 'Menu', '/masters/menu');
+            $this->insertLink('admin', 'Roles', '/masters/menu/role');
+        $this->endDropdown();
+        $this->beginDropdown('admin', 'Settings', '/', 'settings');
+            $this->insertLink('user,admin', 'Notification', '/notification/read');
         $this->endDropdown();
 
+        $this->menuId = DB::getPdo()->lastInsertId();  //set menuId
         /* Create top menu */
         DB::table('menu_lists')->insert([
-            'id'=>CommonUtil::generateUUID(),
+            'id' => CommonUtil::generateUUID(),
             'name' => 'top_menu'
         ]);
-        $this->menuId = DB::getPdo()->lastInsertId();  //set menuId
-        $this->beginDropdown('guest,user,admin', 'Pages');
-            $this->insertLink('guest,user,admin', 'Dashboard', '/');
-            $this->insertLink('user,admin', 'Notification', '/notes');
-        $this->endDropdown();
 
         $this->joinAllByTransaction(); ///   <===== Must by use on end of this seeder
     }

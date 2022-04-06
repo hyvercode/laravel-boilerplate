@@ -3,7 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\MenuListController;
+use App\Http\Controllers\MenuRoleController;
 use App\Http\Controllers\ProspectDebtorController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Http\Request;
@@ -73,6 +77,60 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/show/{id}', [UserController::class, 'show']);
             Route::delete('/delete/{id}', [UserController::class, 'delete']);
             Route::get('/profile', [UserController::class, 'profile']);
+        });
+
+        /**
+         * menu-service
+         */
+        Route::group(['prefix' => 'menus'], function () {
+            Route::get('/', [MenuController::class, 'all']);
+            Route::get('/paginate', [MenuController::class, 'paginate']);
+            Route::post('/create', [MenuController::class, 'create']);
+            Route::post('/update/{id}', [MenuController::class, 'update']);
+            Route::get('/show/{id}', [MenuController::class, 'show']);
+            Route::delete('/delete/{id}', [MenuController::class, 'delete']);
+            Route::get('/menu', [MenuController::class, 'getMenu']);
+        });
+
+        /**
+         * menu-list-service
+         */
+        Route::group(['prefix' => 'menu-list'], function () {
+            Route::get('/', [MenuListController::class, 'all']);
+            Route::get('/paginate', [MenuListController::class, 'paginate']);
+            Route::post('/create', [MenuListController::class, 'create']);
+            Route::post('/update/{id}', [MenuListController::class, 'update']);
+            Route::get('/show/{id}', [MenuListController::class, 'show']);
+            Route::delete('/delete/{id}', [MenuListController::class, 'delete']);
+        });
+
+        /**
+         * menu-role-service
+         */
+        Route::group(['prefix' => 'menu-role'], function () {
+            Route::get('/', [MenuRoleController::class, 'all']);
+            Route::get('/paginate', [MenuRoleController::class, 'paginate']);
+            Route::post('/create', [MenuRoleController::class, 'create']);
+            Route::post('/update/{id}', [MenuRoleController::class, 'update']);
+            Route::get('/show/{id}', [MenuRoleController::class, 'show']);
+            Route::delete('/delete/{id}', [MenuRoleController::class, 'delete']);
+        });
+
+        //roles-service
+        Route::group(['prefix' => 'roles'], function () {
+            Route::get('/', [RoleController::class, 'all']);
+            Route::get('/paginate', [RoleController::class, 'paginate']);
+        });
+
+        //inbox-service
+        Route::group(['prefix' => 'inboxs'], function () {
+            Route::get('/', [InboxController::class, 'all']);
+            Route::get('/paginate', [InboxController::class, 'paginate']);
+            Route::post('/create', [InboxController::class, 'create']);
+            Route::post('/read/{id}', [InboxController::class, 'read']);
+            Route::get('/show/{id}', [InboxController::class, 'show']);
+            Route::delete('/delete/{id}', [InboxController::class, 'delete']);
+            Route::get('/count', [InboxController::class, 'count']);
         });
 
         //company-service

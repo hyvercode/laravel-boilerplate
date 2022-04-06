@@ -17,6 +17,7 @@ class CreateMenusTable extends Migration
             $table->uuid('id')->primary()->unique();
             $table->string('name');
             $table->string('href')->nullable();
+            $table->boolean('is_icon')->default(true);
             $table->string('icon')->nullable();
             $table->string('slug');
             $table->uuid('parent_id')->nullable();
