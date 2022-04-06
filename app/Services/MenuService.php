@@ -44,7 +44,7 @@ class MenuService implements BaseService
         return BaseResponse::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
-            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', "", "", $request->page, $request->sortBy, $request->sort)
+            $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->perPage, ['*'], 'page', $request->currentPage, null, null, $request->sortBy, $request->sort)
         );
     }
 
