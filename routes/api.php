@@ -6,7 +6,7 @@ use App\Http\Controllers\InboxController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MenuListController;
 use App\Http\Controllers\MenuRoleController;
-use App\Http\Controllers\ProspectDebtorController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyEmailController;
@@ -42,6 +42,19 @@ Route::post('/email/verify/resend', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
+
+/**
+ * Blog
+ */
+Route::group(['prefix' => 'v1/blog'], function () {
+    /**
+     * post-service
+     */
+    Route::group(['prefix' => 'post'], function () {
+        Route::get('/', [PostController::class, 'all']);
+        Route::get('/paginate', [PostController::class, 'paginate']);
+    });
+});
 
 Route::group(['prefix' => 'v1'], function () {
     /**
@@ -209,6 +222,23 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::post('/update/{id}', ['uses' => 'BusinessController@update']);
                 Route::get('/show/{id}', ['uses' => 'BusinessController@show']);
                 Route::delete('/delete/{id}', ['uses' => 'BusinessController@delete']);
+            });
+        });
+
+        /**
+         * Blog Admin
+         */
+        Route::group(['prefix' => 'blogs'], function () {
+            /**
+             * menu-role-service
+             */
+            Route::group(['prefix' => 'post'], function () {
+                Route::get('/', [PostController::class, 'all']);
+                Route::get('/paginate', [MenuRoleController::class, 'paginate']);
+                Route::post('/create', [MenuRoleController::class, 'create']);
+                Route::post('/update/{id}', [MenuRoleController::class, 'update']);
+                Route::get('/show/{id}', [MenuRoleController::class, 'show']);
+                Route::delete('/delete/{id}', [MenuRoleController::class, 'delete']);
             });
         });
 
