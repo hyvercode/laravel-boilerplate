@@ -18,8 +18,8 @@ class AuthService
 
     use BaseResponse;
 
-    protected $jwt;
-    protected $authOtpService;
+    protected JWTAuth $jwt;
+    protected OtpService $authOtpService;
 
     public function __construct(JWTAuth        $jwt, OtpService $authOtpService,
                                 UserRepository $userRepository, MailGateway $sitamaGateway)
@@ -67,7 +67,7 @@ class AuthService
     {
         auth()->logout();
         auth()->invalidate(true);
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -79,7 +79,7 @@ class AuthService
      */
     public function refreshToken(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->generateToken(auth()->refresh())
@@ -101,7 +101,7 @@ class AuthService
         if (empty($user)) {
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -160,7 +160,7 @@ class AuthService
             Log::error(Constants::ERROR, ['message' => $ex->getMessage()]);
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $response
@@ -201,7 +201,7 @@ class AuthService
         $this->authOtpService->deleteById($user_id->id);
         $response = array("id" => CommonUtil::encrypt_decrypt(Constants::ENCRYPT, $user_id->id));
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $response
@@ -235,7 +235,7 @@ class AuthService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );

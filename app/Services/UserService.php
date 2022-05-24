@@ -19,7 +19,8 @@ use Monolog\Logger;
 class UserService implements BaseService
 {
 
-    private $userRepository;
+    use BaseResponse;
+    private UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository)
     {
@@ -32,7 +33,7 @@ class UserService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->userRepository->all(['*'], 'active', true)
@@ -45,7 +46,7 @@ class UserService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->userRepository->paginate($request->searchBy, $request->searchParam, $request->perPage, ['*'], 'page', $request->currentPage, 'active', true, $request->sortBy, $request->sort)
@@ -78,7 +79,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );
@@ -103,7 +104,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -122,7 +123,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $record
@@ -151,7 +152,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );
@@ -170,7 +171,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $record
@@ -222,7 +223,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -246,7 +247,7 @@ class UserService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );

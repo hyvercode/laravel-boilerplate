@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 class CityService implements BaseService
 {
 
-    private $cityRepository;
+    use BaseResponse;
+    private CityRepository $cityRepository;
 
     public function __construct(CityRepository $cityRepository)
     {
@@ -24,7 +25,7 @@ class CityService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->cityRepository->all(['id', 'province_id', 'city_name'], 'active', Constants::ACTIVE)
@@ -56,7 +57,7 @@ class CityService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -77,7 +78,7 @@ class CityService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -95,7 +96,7 @@ class CityService implements BaseService
         } catch (\Exception $ex) {
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $records
@@ -113,7 +114,7 @@ class CityService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->cityRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'active', Constants::ACTIVE)
@@ -145,7 +146,7 @@ class CityService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );
@@ -157,7 +158,7 @@ class CityService implements BaseService
      */
     public function findByProvince($province_id)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->cityRepository->findByProvince($province_id)

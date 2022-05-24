@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class MenuListController extends Controller
 {
-    private $menuListService;
+    private MenuListService $menuListService;
 
     public function __construct(MenuListService $menuListService)
     {

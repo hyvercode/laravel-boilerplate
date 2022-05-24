@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
-    private $companyService;
+    private CompanyService $companyService;
 
     public function __construct(CompanyService $companyService)
     {

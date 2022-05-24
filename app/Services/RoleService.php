@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 
 class RoleService implements BaseService
 {
-    protected $roleRepository;
+    use BaseResponse;
+    protected RoleRepository $roleRepository;
 
     public function __construct(RoleRepository $roleRepository)
     {
@@ -23,7 +24,7 @@ class RoleService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->roleRepository->all(['*'])
@@ -37,7 +38,7 @@ class RoleService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->roleRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page)

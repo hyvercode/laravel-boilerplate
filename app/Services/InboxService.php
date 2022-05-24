@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class InboxService
 {
-    private $inboxRepository;
+    use BaseResponse;
+    private InboxRepository $inboxRepository;
 
     public function __construct(InboxRepository $inboxRepository)
     {
@@ -26,7 +27,7 @@ class InboxService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->inboxRepository->all(['*'], null, null, 'company_id', auth()->user()->company_id)
@@ -39,7 +40,7 @@ class InboxService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->inboxRepository->pagination($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, auth()->user()->id, $request->sortBy, $request->sort)
@@ -68,7 +69,7 @@ class InboxService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -89,7 +90,7 @@ class InboxService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -108,7 +109,7 @@ class InboxService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $record
@@ -134,7 +135,7 @@ class InboxService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $read
@@ -149,7 +150,7 @@ class InboxService
      */
     public function getCount(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             [

@@ -12,8 +12,9 @@ use Illuminate\Http\Request;
 class BusinessService implements BaseService
 {
 
-    protected $businessRepository;
+    use BaseResponse;
 
+    protected BusinessRepository $businessRepository;
 
     public function __construct(BusinessRepository $businessRepository)
     {
@@ -26,7 +27,7 @@ class BusinessService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->businessRepository->all(['id', 'business_name', 'active'], 'active', Constants::ACTIVE)
@@ -50,7 +51,7 @@ class BusinessService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -71,7 +72,7 @@ class BusinessService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -89,7 +90,7 @@ class BusinessService implements BaseService
         } catch (\Exception $ex) {
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $business
@@ -107,7 +108,7 @@ class BusinessService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->businessRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'active', Constants::ACTIVE)
@@ -132,7 +133,7 @@ class BusinessService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );

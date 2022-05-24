@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Log;
 class BankService implements BaseService
 {
 
-    private $bankRepository;
+    use BaseResponse;
+    private BankRepository $bankRepository;
 
     public function __construct(BankRepository $bankRepository)
     {
@@ -27,7 +28,7 @@ class BankService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->bankRepository->all(['*'], 'active', Constants::ACTIVE)
@@ -40,13 +41,19 @@ class BankService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->bankRepository->paginate($request->searchBy, $request->searchParam, $request->limit, ['*'], 'page', $request->page, 'active', true)
         );
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @throws BusinessException
+     * @author mohirwanh <mohirwanh@gmail.com>
+     */
     public function create(Request $request)
     {
         try {
@@ -62,7 +69,7 @@ class BankService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -88,7 +95,7 @@ class BankService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -107,7 +114,7 @@ class BankService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $record
@@ -136,7 +143,7 @@ class BankService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );

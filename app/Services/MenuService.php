@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Log;
 class MenuService implements BaseService
 {
 
-    private $menuRepository;
+    use BaseResponse;
+    private MenuRepository $menuRepository;
 
     public function __construct(MenuRepository $menuRepository)
     {
@@ -28,7 +29,7 @@ class MenuService implements BaseService
      */
     public function all(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->menuRepository->all(['*'], 'active', true)
@@ -41,7 +42,7 @@ class MenuService implements BaseService
      */
     public function paginate(Request $request)
     {
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->menuRepository->paginate($request->searchBy, $request->searchParam, $request->perPage, ['*'], 'page', $request->currentPage, null, null, $request->sortBy, $request->sort)
@@ -73,7 +74,7 @@ class MenuService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -99,7 +100,7 @@ class MenuService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200
         );
@@ -118,7 +119,7 @@ class MenuService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_409, Constants::ERROR_MESSAGE_9001, Constants::ERROR_CODE_9001);
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $record
@@ -151,7 +152,7 @@ class MenuService implements BaseService
             throw new BusinessException(Constants::HTTP_CODE_500, Constants::ERROR_MESSAGE_9000, Constants::ERROR_CODE_9000);
         }
 
-        return BaseResponse::statusResponse(
+        return self::statusResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
         );
@@ -179,7 +180,7 @@ class MenuService implements BaseService
             $menuName = 'sidebar_menu';
         }
 
-        return BaseResponse::buildResponse(
+        return self::buildResponse(
             Constants::HTTP_CODE_200,
             Constants::HTTP_MESSAGE_200,
             $this->menuRepository->getMenu($roles, $menuName)

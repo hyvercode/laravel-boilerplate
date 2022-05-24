@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class InboxController extends Controller
 {
 
-    private $inboxService;
+    private InboxService $inboxService;
 
     public function __construct(InboxService $inboxService)
     {

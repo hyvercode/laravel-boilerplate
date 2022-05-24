@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class AuthController
 {
-    private $authService;
+    private AuthService $authService;
 
     public function __construct(AuthService $authService)
     {

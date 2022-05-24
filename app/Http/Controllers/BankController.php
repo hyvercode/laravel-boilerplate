@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class BankController extends Controller
 {
-    protected $bankService;
+    protected BankService $bankService;
 
     public function __construct(BankService $bankService)
     {

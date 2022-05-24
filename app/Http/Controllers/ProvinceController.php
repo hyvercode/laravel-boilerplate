@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ProvinceController extends Controller
 {
-    private $provinceService;
+    private ProvinceService $provinceService;
 
     public function __construct(ProvinceService $provinceService)
     {

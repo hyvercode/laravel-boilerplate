@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class MenuRoleController extends Controller
 {
-    private $menuRoleService;
+    private MenuRoleService $menuRoleService;
 
     public function __construct(MenuRoleService $menuRoleService)
     {

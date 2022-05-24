@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class VillageController extends Controller
 {
-    private $villageService;
+    private VillageService $villageService;
 
     public function __construct(VillageService $villageService)
     {

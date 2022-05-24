@@ -6,10 +6,12 @@ use App\Models\AuthOtp;
 use App\Repositories\AutOtpRepository;
 use App\Helpers\CommonUtil;
 use App\Helpers\DateTimeConverter;
+use App\Traits\BaseResponse;
 
 class OtpService
 {
-    protected $otpRepository;
+    use BaseResponse;
+    protected AutOtpRepository $otpRepository;
 
     public function __construct(AutOtpRepository $autOtpRepository)
     {

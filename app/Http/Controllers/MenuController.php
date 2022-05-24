@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class MenuController
 {
 
-    private $menuService;
+    private MenuService $menuService;
 
     public function __construct(MenuService $menuService)
     {

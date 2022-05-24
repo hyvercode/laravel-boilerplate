@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class CityController extends Controller
 {
-    private $cityService;
+    private CityService $cityService;
 
     public function __construct(CityService $cityService)
     {

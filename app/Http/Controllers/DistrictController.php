@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class DistrictController extends Controller
 {
-    private $districtService;
+    private DistrictService $districtService;
 
     public function __construct(DistrictService $districtService)
     {
